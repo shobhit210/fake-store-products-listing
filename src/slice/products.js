@@ -31,6 +31,7 @@ export const getProductDetail = createAsyncThunk(
 
 const initialState = {
     products: [],
+    fullProductsList: [],
     productDetail: {},
     isLoading: true,
 };
@@ -46,6 +47,7 @@ const productsSlice = createSlice({
         [getProductsList.fulfilled]: (state, action) => {
             // console.log("Reducer Response", action)
             state.products = action.payload;
+            state.fullProductsList = action.payload;
             state.isLoading = false
         },
         [getProductsList.rejected]: (state) => {
@@ -62,8 +64,16 @@ const productsSlice = createSlice({
         [getProductDetail.rejected]: (state) => {
             state.isLoading = false
         },
-
+    },
+    reducers: {
+        searchItem: (state, action) => {
+            state.products = state.fullProductsList;
+            let searchTerm = action.payload;
+            state.products = state.products.filter((item) => item.title.toLowerCase().includes(searchTerm.toLowerCase()));
+        }
     }
 });
+
+export const { searchItem } = productsSlice.actions;
 
 export default productsSlice.reducer;
