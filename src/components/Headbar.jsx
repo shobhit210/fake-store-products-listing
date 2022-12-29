@@ -9,8 +9,12 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import ComingSoonModal from './ComingSoonModal';
 import { Tooltip } from '@mui/material';
+import LocalMallIcon from '@mui/icons-material/LocalMall';
+import useStyles from '../shared-features/sharedStyles';
 
 const Headbar = () => {
+
+    const classes = useStyles()
 
     const [open, setOpen] = useState(false)
 
@@ -27,7 +31,8 @@ const Headbar = () => {
             <AppBar position="sticky" color="secondary">
                 <Toolbar>
 
-                    <Typography variant="h6" component="div" sx={{ flexGrow: 1 }} >
+                    <Typography variant="h5" component="div" className={classes.headerLogo} >
+                        <LocalMallIcon sx={{ mr: 1 }} />
                         Sho's Store
                     </Typography>
 
@@ -48,7 +53,7 @@ const Headbar = () => {
                             </IconButton>
                         </Tooltip>
                     </Box>
-                    
+
                 </Toolbar>
             </AppBar>
             {

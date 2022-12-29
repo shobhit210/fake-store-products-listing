@@ -7,7 +7,6 @@ export const getProductsList = createAsyncThunk(
         try {
             const url = `/products`;
             const res = await productsFetch.get(url);
-            // console.log("Action Response", res)
             return res.data;
         } catch (error) {
             return thunkAPI.rejectWithValue(error.response.data.message);
@@ -21,7 +20,33 @@ export const getProductDetail = createAsyncThunk(
         try {
             const url = `/products/${id}`;
             const res = await productsFetch.get(url);
-            // console.log("Action Response", res)
+            return res.data;
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error.response.data.message);
+        }
+    }
+)
+
+export const getProductCategories = createAsyncThunk(
+    "productCategories",
+    async (thunkAPI) => {
+        try {
+            const url = `/products/categories`;
+            const res = await productsFetch.get(url);
+            return res.data;
+        }
+        catch (error) {
+            return thunkAPI.rejectWithValue(error.response.data.message);
+        }
+    }
+)
+
+export const getProductsByCategory = createAsyncThunk(
+    "getProductsByCategories",
+    async (category, thunkAPI) => {
+        try {
+            const url = `/products/category/${category}`;
+            const res = await productsFetch.get(url);
             return res.data;
         } catch (error) {
             return thunkAPI.rejectWithValue(error.response.data.message);
@@ -31,6 +56,7 @@ export const getProductDetail = createAsyncThunk(
 
 const initialState = {
     products: [],
+    productCategories: [],
     fullProductsList: [],
     productDetail: {},
     isLoading: true,
@@ -45,7 +71,6 @@ const productsSlice = createSlice({
             state.isLoading = true
         },
         [getProductsList.fulfilled]: (state, action) => {
-            // console.log("Reducer Response", action)
             state.products = action.payload;
             state.fullProductsList = action.payload;
             state.isLoading = false
@@ -57,13 +82,19 @@ const productsSlice = createSlice({
             state.isLoading = true
         },
         [getProductDetail.fulfilled]: (state, action) => {
-            // console.log("Reducer Response", action)
             state.productDetail = action.payload;
             state.isLoading = false
         },
         [getProductDetail.rejected]: (state) => {
             state.isLoading = false
         },
+        [getProductCategories.fulfilled]: (state, action) => {
+            state.productCategories = action.payload;
+        },
+        [getProductsByCategory.fulfilled]: (state, action) => {
+            state.products = action.payload;
+        }
+
     },
     reducers: {
         searchItem: (state, action) => {

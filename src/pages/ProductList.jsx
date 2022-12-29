@@ -1,28 +1,61 @@
-import { Box, Card, CardActionArea, CardContent, CardMedia, FormControl, Grid, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material'
+import { Box, Button, FormControl, Grid, InputAdornment, InputLabel, MenuItem, Pagination, Select, TextField, Typography } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Link } from 'react-router-dom'
 import ProductCard from '../components/ProductCard'
-import { getProductsList, searchItem } from '../slice/products'
+import { getProductsList, searchItem, getProductCategories, getProductsByCategory } from '../slice/products'
+import ShoppingBagOutlinedIcon from '@mui/icons-material/ShoppingBagOutlined';
+import useStyles from '../shared-features/sharedStyles'
+import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
+import ComingSoonModal from '../components/ComingSoonModal';
+import FavoriteIcon from '@mui/icons-material/Favorite';
 
 const ProductList = () => {
 
   const dispatch = useDispatch()
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('')
+  const classes = useStyles()
 
-  const { products, isLoading } = useSelector(store => store.products)
-  // console.log("Products Frontend", products)
-  // console.log("Loading state", isLoading)
+  const { products, isLoading, productCategories } = useSelector(store => store.products)
+
+  //Pagination
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(9)
+  const indexOfLastPost = currentPage * itemsPerPage;
+  const indexOfFirstPost = indexOfLastPost - itemsPerPage;
+  const currentItems = products.slice(indexOfFirstPost, indexOfLastPost)
+
+  //Modal
+  const [open, setOpen] = useState(false)
+
+  const handleOpen = () => {
+    setOpen(true)
+  }
+
+  const handleClose = () => {
+    setOpen(false)
+  }
+
+  const handlePageChange = (event, value) => {
+    setCurrentPage(value)
+  }
 
   useEffect(() => {
     dispatch(getProductsList())
+    dispatch(getProductCategories())
   }, [])
 
   useEffect(() => {
-      dispatch(searchItem(search))
+    dispatch(searchItem(search))
   }, [search, dispatch])
 
+  useEffect(() => {
+    if (category) {
+      (category === 'all') ?
+        dispatch(getProductsList()) :
+        dispatch(getProductsByCategory(category))
+    }
+  }, [category, dispatch])
 
   const handleProductSearch = (e) => {
     setSearch(e.target.value)
@@ -34,59 +67,77 @@ const ProductList = () => {
 
   if (isLoading) {
     return (
-      <>
-        <Typography variant="h5" gutterBottom align='center'>
-          Loading items...
+      <Box className={classes.loadingParent}>
+        <Typography align="center" >
+          <ShoppingBagOutlinedIcon /><br />
+          Hang on!!! <br />
+          Loading Products...
         </Typography>
-      </>
+      </Box>
     )
   }
 
   return (
     <>
       <Box sx={{ padding: '40px 100px' }}>
-        <Box sx={{ backgroundColor: '#fff', width: '100%', mb: 5 }}>
-          <Grid container spacing={3}>
+        <Box className={classes.filtersParent}>
+          <Grid container spacing={5}>
             <Grid item xs={12} sm={6} md={4} lg={4}>
               <TextField
                 fullWidth
                 variant="outlined"
+                color="secondary"
                 label="Search Products"
                 name="products"
                 value={search}
                 onChange={handleProductSearch}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <SearchOutlinedIcon color="secondary" />
+                    </InputAdornment>
+                  ),
+                }}
               />
             </Grid>
 
             <Grid item xs={12} sm={6} md={4} lg={4}>
               <FormControl fullWidth>
-                <InputLabel id="demo-simple-select-label">Category</InputLabel>
+                <InputLabel color="secondary">Category</InputLabel>
                 <Select
-                  labelId="demo-simple-select-label"
-                  id="demo-simple-select"
+                  color="secondary"
                   value={category}
                   label="Category"
                   onChange={handleCategoryChange}
                 >
-                  <MenuItem value={10}>Ten</MenuItem>
-                  <MenuItem value={20}>Twenty</MenuItem>
-                  <MenuItem value={30}>Thirty</MenuItem>
+                  <MenuItem value={'all'}>All</MenuItem>
+                  {
+                    productCategories && productCategories.map((item, key) => {
+                      return <MenuItem value={item} key={item + key}>{item}</MenuItem>
+                    })
+                  }
                 </Select>
               </FormControl>
-
             </Grid>
 
             <Grid item xs={12} sm={6} md={4} lg={4}>
-              <TextField
-                label="Outlined"
-                variant="outlined"
-              />
+              <Button
+                variant="contained"
+                color="secondary"
+                fullWidth
+                size="large"
+                sx={{ padding: '13.5px 0' }}
+                onClick={handleOpen}
+                startIcon={<FavoriteIcon />}
+              >
+                View Popular Products</Button>
             </Grid>
+
           </Grid>
         </Box>
         <Grid container spacing={8}>
           {
-            products && products.map((item) => {
+            currentItems && currentItems.map((item) => {
               return (<Grid item xs={12} sm={6} md={4} lg={4} key={item.id}>
 
                 <ProductCard item={item} />
@@ -94,9 +145,22 @@ const ProductList = () => {
               </Grid>)
             })
           }
-
         </Grid>
+
+        <Box className={classes.paginationParent}>
+          <Pagination
+            color="secondary"
+            count={Math.ceil(products.length / itemsPerPage)}
+            page={currentPage}
+            onChange={handlePageChange}
+            sx={{ mt: 5 }}
+          />
+        </Box>
+
       </Box>
+      {
+        open ? <ComingSoonModal open={open} handleClose={handleClose} /> : ''
+      }
     </>
   )
 }

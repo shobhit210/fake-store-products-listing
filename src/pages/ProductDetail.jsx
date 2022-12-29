@@ -7,6 +7,8 @@ import StarIcon from '@mui/icons-material/Star';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import useStyles from '../shared-features/sharedStyles'
 import ComingSoonModal from '../components/ComingSoonModal'
+import LinesEllipsis from 'react-lines-ellipsis'
+import ShoppingBagOutlinedIcon from '@mui/icons-material/ShoppingBagOutlined';
 
 const ProductDetail = () => {
 
@@ -15,7 +17,6 @@ const ProductDetail = () => {
   const navigate = useNavigate();
   const classes = useStyles()
   const { productDetail, isLoading } = useSelector(store => store.products)
-  console.log("Product detail front end", productDetail)
 
   //Modal
   const [open, setOpen] = useState(false)
@@ -37,9 +38,13 @@ const ProductDetail = () => {
       <>
         <Box className={classes.productDetailParent}>
           <Box className={classes.innerProductDetailParent}>
-            <Typography variant="h5" gutterBottom align='center' sx={{width: '100%', mt: 3}}>
-              Loading product details...
-            </Typography>
+            <Box className={classes.detailsLoadingParent}>
+              <Typography align="center" >
+                <ShoppingBagOutlinedIcon /><br />
+                Hang on!!! <br />
+                Loading Product Details...
+              </Typography>
+            </Box>
           </Box>
         </Box>
       </>
@@ -70,19 +75,26 @@ const ProductDetail = () => {
         </Box>
         <Box className={classes.productDetails}>
           <Box className={classes.headerHR} />
-          <Typography variant="h3" gutterBottom>
-            {productDetail && productDetail.title}
-          </Typography>
+
+          <LinesEllipsis
+            text={productDetail && productDetail.title}
+            maxLine='2'
+            ellipsis='...'
+            trimRight
+            basedOn='words'
+            className={classes.productDetailsTitle}
+          />
+
           <Typography variant="h4" color="secondary" gutterBottom>
             ${productDetail && productDetail.price}
           </Typography>
-          <Typography variant="h6" gutterBottom>
+          <Typography variant="h6" gutterBottom sx={{ color: 'grey' }}>
             {productDetail && productDetail.category}
           </Typography>
           <Typography
             variant="h6"
             gutterBottom
-            sx={{ display: 'flex', alignItems: 'center' }}
+            className={classes.rating}
           >
             <StarIcon color="secondary" />
             <StarIcon color="secondary" />
@@ -90,13 +102,20 @@ const ProductDetail = () => {
             &nbsp;&nbsp;
             {productDetail && productDetail.rating && productDetail.rating.rate} / 5
           </Typography>
-          <Typography variant="body2" color="secondary" gutterBottom>
-            {productDetail && productDetail.description}
-          </Typography>
-          <Typography variant="h6" gutterBottom>
+
+          <LinesEllipsis
+            text={productDetail && productDetail.description}
+            maxLine='4'
+            ellipsis='...'
+            trimRight
+            basedOn='words'
+            className={classes.productDetailsDetail}
+          />
+
+          <Typography variant="h6" fontSize="17px" gutterBottom>
             Available in stock: {productDetail && productDetail.rating && productDetail.rating.count}
           </Typography>
-          <Button variant="contained" color="secondary" onClick={handleOpen}>Add to cart</Button>
+          <Button variant="contained" color="secondary" onClick={handleOpen} sx={{ mt: 2 }}>Add to cart</Button>
         </Box>
       </Box>
       {
